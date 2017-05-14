@@ -43,17 +43,16 @@ healthchecks:
     timezone: "Europe/Warsaw" #default timezone to use for checks
     checks:
     	simple:
-			client: example
-			name: "Simple hourly check"
-			timeout: 3600
-			tags: [simple, all]
+            client: example
+            name: "Simple hourly check"
+            timeout: 3600
+            tags: [simple, all]
         cron:
             client: example
             name: "Cron-based check"
             schedule: "*/30 * * * *"
             timezone: UTC
             tags: [cron, all]
-
 ```
 
 ## Usage
