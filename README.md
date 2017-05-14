@@ -1,6 +1,5 @@
 # HealthchecksBundle
 
-[![Dependency Status](https://www.versioneye.com/user/projects/5829a1634d093e0048e497b1/badge.svg?style=flat-square)](https://www.versioneye.com/user/projects/5829a1634d093e0048e497b1)
 [![VersionEye](https://img.shields.io/versioneye/d/prgTW/healthchecks-bundle.svg)](https://github.com/prgTW/healthchecks-bundle)
 [![Packagist](https://img.shields.io/packagist/l/prgtw/healthchecks-bundle.svg)](https://github.com/prgTW/healthchecks-bundle)
 [![Packagist](https://img.shields.io/packagist/v/prgtw/healthchecks-bundle.svg)](https://packagist.org/packages/prgtw/healthchecks-bundle)
@@ -41,7 +40,7 @@ healthchecks:
     api:
         clients:
             example: "api-key-here"
-    timezone: "Europe/Warsaw"
+    timezone: "Europe/Warsaw" #default timezone to use for checks
     checks:
     	simple:
 			client: example
@@ -52,6 +51,7 @@ healthchecks:
             client: example
             name: "Cron-based check"
             schedule: "*/30 * * * *"
+            timezone: UTC
             tags: [cron, all]
 
 ```
