@@ -16,12 +16,12 @@
     ],
     "autoload": {
         "psr-4": {
-            "prgTW\\Bundle\\HealthchecksBundle\\": "src/"
+            "prgTW\\HealthchecksBundle\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "prgTW\\Bundle\\HealthchecksBundle\\Tests\\": "tests/"
+            "prgTW\\HealthchecksBundle\\Tests\\": "tests/"
         }
     },
     "require": {
