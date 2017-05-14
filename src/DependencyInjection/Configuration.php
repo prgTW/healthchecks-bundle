@@ -60,7 +60,7 @@ class Configuration implements ConfigurationInterface
 						->end()
 						->scalarNode('base_uri')
 							->info('Base API uri')
-							->defaultValue('https://healthchecks.io/api/v1/')
+							->defaultValue('https://healthchecks.io')
 							->cannotBeEmpty()
 						->end()
 					->end()
