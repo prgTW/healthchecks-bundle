@@ -1,6 +1,6 @@
 # HealthchecksBundle
 
-[![VersionEye](https://img.shields.io/versioneye/d/prgTW/healthchecks-bundle.svg)](https://github.com/prgTW/healthchecks-bundle)
+[![Dependency Status](https://www.versioneye.com/user/projects/59187f4ca786140047b4cd11/badge.svg?style=flat)](https://www.versioneye.com/user/projects/59187f4ca786140047b4cd11)
 [![Packagist](https://img.shields.io/packagist/l/prgtw/healthchecks-bundle.svg)](https://github.com/prgTW/healthchecks-bundle)
 [![Packagist](https://img.shields.io/packagist/v/prgtw/healthchecks-bundle.svg)](https://packagist.org/packages/prgtw/healthchecks-bundle)
 
