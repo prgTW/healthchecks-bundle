@@ -40,7 +40,7 @@ healthchecks:
     api:
         clients:
             example: "api-key-here"
-    timezone: "Europe/Warsaw" #default timezone to use for checks
+    timezone: "Europe/Warsaw" # default timezone to use for checks
     checks:
     	simple:
             client: example
