@@ -1,11 +1,12 @@
 {
     "name": "prgtw/healthchecks-bundle",
-    "description": "Bundle for integration with healthchecks.io",
+    "description": "Bundle for integration with healthchecks.io cron monitoring service",
     "keywords": [
         "symfony",
         "bundle",
         "healthchecks",
-        "expectation"
+        "cron",
+        "monitoring"
     ],
     "license": "MIT",
     "authors": [
