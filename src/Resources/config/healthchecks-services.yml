@@ -1,0 +1,36 @@
+parameters:
+    healthchecks.class: "prgTW\\HealthchecksBundle\\Healthchecks"
+    healthchecks.command.ping.class: "prgTW\\HealthchecksBundle\\Command\\PingCommand"
+    healthchecks.command.pause.class: "prgTW\\HealthchecksBundle\\Command\\PauseCommand"
+    healthchecks.command.setup.class: "prgTW\\HealthchecksBundle\\Command\\SetupCommand"
+
+services:
+    healthchecks.api:
+        class: "%healthchecks.class%"
+        arguments:
+            - # API keys
+            - # API base_uri
+            - # checks
+            - "@serializer"
+
+    healthchecks.command.ping:
+        class: "%healthchecks.command.ping.class%"
+        arguments:
+            - "@healthchecks.api"
+        tags:
+            - { name: "console.command" }
+
+    healthchecks.command.pause:
+        class: "%healthchecks.command.pause.class%"
+        arguments:
+            - "@healthchecks.api"
+        tags:
+            - { name: "console.command" }
+
+    healthchecks.command.setup:
+        class: "%healthchecks.command.setup.class%"
+        arguments:
+            - "@healthchecks.api"
+            - "%healthchecks.check_names%"
+        tags:
+            - { name: "console.command" }

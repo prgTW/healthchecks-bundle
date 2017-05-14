@@ -1,1 +1,4 @@
-# healthchecks-bundle
+# HealthchecksBundle
+
+## TODO:
+- [ ] implement concurrent requests
