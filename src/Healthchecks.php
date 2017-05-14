@@ -115,7 +115,7 @@ class Healthchecks
 
 			$requests[$checkName] = $this->messageFactory->createRequest(
 				'post',
-				sprintf('%s/api/v1/checks', $this->baseUri),
+				sprintf('%s/api/v1/checks/', $this->baseUri),
 				[
 					self::AUTH_HEADER => $this->apiKeys[$check['client']],
 				],
@@ -150,7 +150,7 @@ class Healthchecks
 		{
 			$pingUrl = $check->getPingUrl();
 			$request = $this->messageFactory->createRequest('post', $pingUrl, [
-				self::AUTH_HEADER => $this->apiKeys[$check['client']],
+				self::AUTH_HEADER => $this->apiKeys[$this->checks[$checkName]['client']],
 			]);
 
 			$requests[$checkName] = $request;
@@ -171,7 +171,7 @@ class Healthchecks
 		{
 			$pauseUrl = $check->getPauseUrl();
 			$request  = $this->messageFactory->createRequest('post', $pauseUrl, [
-				self::AUTH_HEADER => $this->apiKeys[$check['client']],
+				self::AUTH_HEADER => $this->apiKeys[$this->checks[$checkName]['client']],
 			]);
 
 			$requests[$checkName] = $request;
