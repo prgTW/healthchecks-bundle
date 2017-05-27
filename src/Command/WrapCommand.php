@@ -27,7 +27,7 @@ class WrapCommand extends Command
 		parent::configure();
 		$this->setName('healthchecks:wrap');
 		$this->addArgument('check', InputArgument::REQUIRED, 'Check name');
-		$this->addArgument('command', InputArgument::REQUIRED, 'Command to run');
+		$this->addArgument('cmd', InputArgument::REQUIRED, 'Command to run');
 		$this->setDescription('Pings given check(s) upon successful execution of a given command');
 	}
 
@@ -35,7 +35,7 @@ class WrapCommand extends Command
 	protected function execute(InputInterface $input, OutputInterface $output)
 	{
 		$check   = $input->getArgument('check');
-		$command = $input->getArgument('command');
+		$command = $input->getArgument('cmd');
 
 		passthru($command, $exitCode);
 
