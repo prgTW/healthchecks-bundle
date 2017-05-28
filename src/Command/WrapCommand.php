@@ -7,8 +7,10 @@ namespace prgTW\HealthchecksBundle\Command;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\ConsoleOutputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use prgTW\HealthchecksBundle\Healthchecks;
+use Symfony\Component\Process\Process;
 
 class WrapCommand extends Command
 {
@@ -37,7 +39,22 @@ class WrapCommand extends Command
 		$check   = $input->getArgument('check');
 		$command = $input->getArgument('cmd');
 
-		passthru($command, $exitCode);
+		$process  = new Process($command);
+		$exitCode = $process->run(function ($type, $buffer) use ($output) {
+			if (Process::ERR === $type)
+			{
+				$out = $output instanceof ConsoleOutputInterface ?
+					$output->getErrorOutput()
+					:
+					$output;
+
+				$out->write($buffer);
+			}
+			else
+			{
+				$output->write($buffer);
+			}
+		});
 
 		if (0 === $exitCode)
 		{
