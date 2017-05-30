@@ -52,8 +52,7 @@ class Healthchecks
 	public function listAllChecks(): array
 	{
 		$checksPerClient = array_map(
-			function (string $clientName)
-			{
+			function (string $clientName) {
 				return $this->listChecks($clientName);
 			},
 			array_keys($this->apiKeys)
@@ -97,12 +96,15 @@ class Healthchecks
 		{
 			$check = $this->checks[$checkName];
 			$json  = [
-				'name'     => $check['name'],
-				'tags'     => implode(' ', $check['tags']),
-				'grace'    => $check['grace'],
-				'channels' => implode(' ', $check['channels']),
-				'unique'   => $check['unique'],
+				'name'   => $check['name'],
+				'tags'   => implode(' ', $check['tags']),
+				'grace'  => $check['grace'],
+				'unique' => $check['unique'],
 			];
+			if (null !== $check['channels'])
+			{
+				$json['channels'] = $check['channels'];
+			}
 			if (null !== $check['timeout'])
 			{
 				$json['timeout'] = $check['timeout'];
