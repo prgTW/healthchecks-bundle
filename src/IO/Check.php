@@ -16,7 +16,7 @@ class Check
 	 *
 	 * @Serializer\Expose()
 	 * @Serializer\SerializedName("last_ping")
-	 * @Serializer\Type("DateTimeImmutable<'Y-m-d\TH:i:s.uO'>")
+	 * @Serializer\Type("DateTimeImmutable<'Y-m-d\TH:i:sO'>")
 	 * @Serializer\Accessor(getter="getLastPing")
 	 */
 	protected $lastPing;
@@ -36,7 +36,7 @@ class Check
 	 *
 	 * @Serializer\Expose()
 	 * @Serializer\SerializedName("next_ping")
-	 * @Serializer\Type("DateTimeImmutable<'Y-m-d\TH:i:s.uO'>")
+	 * @Serializer\Type("DateTimeImmutable<'Y-m-d\TH:i:sO'>")
 	 * @Serializer\Accessor(getter="getNextPing")
 	 */
 	protected $nextPing;
