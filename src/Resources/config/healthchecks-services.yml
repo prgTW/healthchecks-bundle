@@ -12,7 +12,7 @@ services:
             - # API keys
             - # API base_uri
             - # checks
-            - "@serializer"
+            - "@jms_serializer"
 
     healthchecks.command.ping:
         class: "%healthchecks.command.ping.class%"
