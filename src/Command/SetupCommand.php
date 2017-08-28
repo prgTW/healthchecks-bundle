@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace prgTW\HealthchecksBundle\Command;
 
+use prgTW\HealthchecksBundle\Resolver\ResolverInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -18,11 +19,11 @@ class SetupCommand extends Command
 	/** @var string[] */
 	protected $availableChecks;
 
-	public function __construct(Healthchecks $api, array $availableChecks)
+	public function __construct(Healthchecks $api, ResolverInterface $resolver)
 	{
 		parent::__construct();
 		$this->api             = $api;
-		$this->availableChecks = $availableChecks;
+		$this->availableChecks = $resolver->resolveNames();
 	}
 
 	/** {@inheritdoc} */

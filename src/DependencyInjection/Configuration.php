@@ -10,13 +10,13 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 class Configuration implements ConfigurationInterface
 {
-    /** @var string */
-    protected $alias;
+	/** @var string */
+	protected $alias;
 
-    public function __construct(string $alias)
-    {
-        $this->alias = $alias;
-    }
+	public function __construct(string $alias)
+	{
+		$this->alias = $alias;
+	}
 
 	/** {@inheritdoc} */
 	public function getConfigTreeBuilder()
@@ -28,6 +28,13 @@ class Configuration implements ConfigurationInterface
 		$this->addChecksSection($rootNode);
 
 		$rootNode
+			->children()
+				->scalarNode('resolver')
+					->defaultValue('healthchecks.resolver.default')
+					->info('Resolver service to get check configurations')
+					->cannotBeEmpty()
+				->end()
+			->end()
 			->children()
 				->scalarNode('timezone')
 					->info('Default timezone to use for checks')
@@ -77,7 +84,7 @@ class Configuration implements ConfigurationInterface
 				->arrayNode('checks')
 					->useAttributeAsKey('id')
 					->prototype('array')
-                        ->addDefaultsIfNotSet()
+						->addDefaultsIfNotSet()
 						->children()
 							->scalarNode('client')
 								->info('API client to use')
@@ -126,16 +133,16 @@ class Configuration implements ConfigurationInterface
 								->info('"*" assigns all existing notification channels. "" unassigns all notification channels')
 								->defaultNull()
 							->end()
-                            ->arrayNode('unique')
-                                ->info('Names of notification channels for this check. "*" assigns all existing notification channels. "" unassigns all notification channels')
-                                ->defaultValue(['name'])
-                                ->prototype('scalar')
-                                    ->validate()
-                                        ->ifNotInArray(['name', 'tags', 'timeout', 'grace'])
-                                        ->thenInvalid('"unique" can be composed only of ["name", "tags", "timeout", "grace"] values')
-                                    ->end()
-                                ->end()
-                            ->end()
+							->arrayNode('unique')
+								->info('Names of notification channels for this check. "*" assigns all existing notification channels. "" unassigns all notification channels')
+								->defaultValue(['name'])
+								->prototype('scalar')
+									->validate()
+										->ifNotInArray(['name', 'tags', 'timeout', 'grace'])
+										->thenInvalid('"unique" can be composed only of ["name", "tags", "timeout", "grace"] values')
+									->end()
+								->end()
+							->end()
 						->end()
 					->end()
 				->end()

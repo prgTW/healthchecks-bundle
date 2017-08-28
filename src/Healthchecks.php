@@ -11,6 +11,7 @@ use Http\Message\MessageFactory;
 use prgTW\HealthchecksBundle\IO\Check;
 use prgTW\HealthchecksBundle\IO\Checks;
 use JMS\Serializer\SerializerInterface;
+use prgTW\HealthchecksBundle\Resolver\ResolverInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -36,14 +37,14 @@ class Healthchecks
 	/** @var SerializerInterface */
 	protected $serializer;
 
-	public function __construct(array $apiKeys, string $baseUri, array $checks, SerializerInterface $serializer)
+	public function __construct(array $apiKeys, string $baseUri, ResolverInterface $resolver, SerializerInterface $serializer)
 	{
 		$this->client         = HttpClientDiscovery::find();
 		$this->messageFactory = MessageFactoryDiscovery::find();
 		$this->apiKeys        = $apiKeys;
 		$this->baseUri        = $baseUri;
-		$this->checks         = $checks;
 		$this->serializer     = $serializer;
+		$this->checks         = $resolver->resolve();
 	}
 
 	/**

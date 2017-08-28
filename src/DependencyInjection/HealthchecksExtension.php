@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace prgTW\HealthchecksBundle\DependencyInjection;
 
+use Symfony\Component\DependencyInjection\Alias;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
@@ -25,11 +26,11 @@ class HealthchecksExtension extends ConfigurableExtension
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('healthchecks-services.yml');
 
-        $checkIdToClient = [];
-
+        $checkIdToClient      = [];
         $availableClientNames = array_keys($mergedConfig['api']['clients']);
-        $clientNames = array_unique(array_values($checkIdToClient));
-        $missingClientNames = array_diff($clientNames, $availableClientNames);
+        $clientNames          = array_unique(array_values($checkIdToClient));
+        $missingClientNames   = array_diff($clientNames, $availableClientNames);
+
         if (count($missingClientNames)) {
             throw new \InvalidArgumentException(
                 vsprintf(
@@ -48,9 +49,9 @@ class HealthchecksExtension extends ConfigurableExtension
         $apiDefinition = $container->findDefinition('healthchecks.api');
         $apiDefinition->replaceArgument(0, $mergedConfig['api']['clients']);
         $apiDefinition->replaceArgument(1, $mergedConfig['api']['base_uri']);
-        $apiDefinition->replaceArgument(2, $mergedConfig['checks']);
 
-        $container->setParameter('healthchecks.check_names', array_keys($mergedConfig['checks']));
+        $container->setParameter('healthchecks.checks', $mergedConfig['checks']);
+        $container->setAlias('healthchecks.resolver', new Alias($mergedConfig['resolver'], false));
     }
 
     /** {@inheritdoc} */
