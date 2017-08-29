@@ -12,9 +12,6 @@ services:
         arguments:
             - "%healthchecks.checks%"
 
-    healthchecks.resolver:
-        synthetic: true
-
     healthchecks.api:
         class: "%healthchecks.class%"
         arguments:

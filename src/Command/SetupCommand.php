@@ -13,6 +13,9 @@ use prgTW\HealthchecksBundle\Healthchecks;
 
 class SetupCommand extends Command
 {
+	/** @var ResolverInterface */
+	private $resolver;
+
 	/** @var Healthchecks */
 	protected $api;
 
@@ -22,8 +25,9 @@ class SetupCommand extends Command
 	public function __construct(Healthchecks $api, ResolverInterface $resolver)
 	{
 		parent::__construct();
-		$this->api             = $api;
-		$this->availableChecks = $resolver->resolveNames();
+
+		$this->api      = $api;
+		$this->resolver = $resolver;
 	}
 
 	/** {@inheritdoc} */
@@ -38,7 +42,7 @@ class SetupCommand extends Command
 	/** {@inheritdoc} */
 	protected function execute(InputInterface $input, OutputInterface $output)
 	{
-		$checks = $input->getArgument('check') ?: $this->availableChecks;
+		$checks = $input->getArgument('check') ?: $this->resolver->resolveNames();
 		$this->api->setupMany($checks);
 	}
 }

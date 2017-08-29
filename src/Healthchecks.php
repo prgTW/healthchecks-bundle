@@ -31,8 +31,11 @@ class Healthchecks
 	/** @var int */
 	private $baseUri;
 
+	/** @var ResolverInterface */
+	private $resolver;
+
 	/** @var array */
-	protected $checks;
+	protected $checks = null;
 
 	/** @var SerializerInterface */
 	protected $serializer;
@@ -44,7 +47,7 @@ class Healthchecks
 		$this->apiKeys        = $apiKeys;
 		$this->baseUri        = $baseUri;
 		$this->serializer     = $serializer;
-		$this->checks         = $resolver->resolve();
+		$this->resolver       = $resolver;
 	}
 
 	/**
@@ -95,7 +98,7 @@ class Healthchecks
 		$requests = [];
 		foreach ($checkNames as $checkName)
 		{
-			$check = $this->checks[$checkName];
+			$check = $this->getCheck($checkName);
 			$json  = [
 				'name'   => $check['name'],
 				'tags'   => implode(' ', $check['tags']),
@@ -153,7 +156,7 @@ class Healthchecks
 		{
 			$pingUrl = $check->getPingUrl();
 			$request = $this->messageFactory->createRequest('post', $pingUrl, [
-				self::AUTH_HEADER => $this->apiKeys[$this->checks[$checkName]['client']],
+				self::AUTH_HEADER => $this->apiKeys[$this->getCheck($checkName)['client']],
 			]);
 
 			$requests[$checkName] = $request;
@@ -174,7 +177,7 @@ class Healthchecks
 		{
 			$pauseUrl = $check->getPauseUrl();
 			$request  = $this->messageFactory->createRequest('post', $pauseUrl, [
-				self::AUTH_HEADER => $this->apiKeys[$this->checks[$checkName]['client']],
+				self::AUTH_HEADER => $this->apiKeys[$this->getCheck($checkName)['client']],
 			]);
 
 			$requests[$checkName] = $request;
@@ -208,7 +211,7 @@ class Healthchecks
 	 */
 	protected function getChecksByClients(array $checkNames): array
 	{
-		$checks          = array_intersect_key($this->checks, array_flip($checkNames));
+		$checks          = array_intersect_key($this->getChecks(), array_flip($checkNames));
 		$checksByClients = $this->groupChecksByClient($checks);
 
 		return $checksByClients;
@@ -262,9 +265,29 @@ class Healthchecks
 
 	protected function validateCheckName(string $checkName)
 	{
-		if (false === isset($this->checks[$checkName]))
+		if (null === $this->getCheck($checkName))
 		{
 			throw new \InvalidArgumentException(sprintf('Unknown check: %s', $checkName));
 		}
+	}
+
+	private function getChecks(): array
+	{
+		if(null === $this->checks)
+		{
+			$this->checks = $this->resolver->resolve();
+		}
+
+		return $this->checks;
+	}
+
+	/**
+	 * @param string $key
+	 *
+	 * @return array|null
+	 */
+	private function getCheck(string $key)
+	{
+		return $this->getChecks()[$key] ?? null;
 	}
 }
