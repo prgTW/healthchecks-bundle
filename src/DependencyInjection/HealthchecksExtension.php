@@ -49,6 +49,7 @@ class HealthchecksExtension extends ConfigurableExtension
         $apiDefinition = $container->findDefinition('healthchecks.api');
         $apiDefinition->replaceArgument(0, $mergedConfig['api']['clients']);
         $apiDefinition->replaceArgument(1, $mergedConfig['api']['base_uri']);
+        $apiDefinition->replaceArgument(2, $mergedConfig['timezone']);
 
         $container->setParameter('healthchecks.checks', $mergedConfig['checks']);
         $container->setAlias('healthchecks.resolver', new Alias($mergedConfig['resolver'], false));

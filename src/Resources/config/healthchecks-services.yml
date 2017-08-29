@@ -17,6 +17,7 @@ services:
         arguments:
             - # API keys
             - # API base_uri
+            - # Default timezone
             - "@healthchecks.resolver"
             - "@jms_serializer"
 

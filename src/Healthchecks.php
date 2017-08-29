@@ -14,6 +14,9 @@ use JMS\Serializer\SerializerInterface;
 use prgTW\HealthchecksBundle\Resolver\ResolverInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Validation;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class Healthchecks
 {
@@ -34,20 +37,38 @@ class Healthchecks
 	/** @var ResolverInterface */
 	private $resolver;
 
+	/** @var ValidatorInterface */
+	private $validator;
+
+	/** @var Assert\Collection */
+	private $constraints;
+
 	/** @var array */
 	protected $checks = null;
 
 	/** @var SerializerInterface */
 	protected $serializer;
 
-	public function __construct(array $apiKeys, string $baseUri, ResolverInterface $resolver, SerializerInterface $serializer)
+	const DEFAULT_CHECK_VALUES = [
+		'timeout'  => null,
+		'grace'    => 3600,
+		'schedule' => '* * * * *',
+		'tags'     => [],
+		'channels' => null,
+		'unique'   => ['name'],
+	];
+
+	protected $defaultTimezone = null;
+
+	public function __construct(array $apiKeys, string $baseUri, string $defaultTimezone, ResolverInterface $resolver, SerializerInterface $serializer)
 	{
-		$this->client         = HttpClientDiscovery::find();
-		$this->messageFactory = MessageFactoryDiscovery::find();
-		$this->apiKeys        = $apiKeys;
-		$this->baseUri        = $baseUri;
-		$this->serializer     = $serializer;
-		$this->resolver       = $resolver;
+		$this->client          = HttpClientDiscovery::find();
+		$this->messageFactory  = MessageFactoryDiscovery::find();
+		$this->apiKeys         = $apiKeys;
+		$this->baseUri         = $baseUri;
+		$this->serializer      = $serializer;
+		$this->resolver        = $resolver;
+		$this->defaultTimezone = $defaultTimezone;
 	}
 
 	/**
@@ -99,6 +120,10 @@ class Healthchecks
 		foreach ($checkNames as $checkName)
 		{
 			$check = $this->getCheck($checkName);
+			$check = $this->applyDefaults($check);
+
+			$this->validateCheck($check);
+
 			$json  = [
 				'name'   => $check['name'],
 				'tags'   => implode(' ', $check['tags']),
@@ -289,5 +314,55 @@ class Healthchecks
 	private function getCheck(string $key)
 	{
 		return $this->getChecks()[$key] ?? null;
+	}
+
+	private function validateCheck(array $check)
+	{
+		$constraints = $this->getConstraints();
+		$validator   = $this->getValidator();
+		$violations  = $validator->validate($check, $constraints);
+
+		if($violations->count() > 0)
+		{
+			throw new \InvalidArgumentException((string)$violations);
+		}
+	}
+
+	private function applyDefaults(array $check)
+	{
+		return array_merge(
+			self::DEFAULT_CHECK_VALUES,
+			['timezone' => $this->defaultTimezone],
+			$check
+		);
+	}
+
+	private function getConstraints()
+	{
+		$this->constraints = $this->constraints ?? new Assert\Collection(
+			[
+				'client'  => new Assert\NotBlank(),
+				'name'    => new Assert\NotBlank(),
+				'timeout' => new Assert\Range(['min' => 60, 'max' => 604800]),
+				'grace'   => new Assert\Range(['min' => 60, 'max' => 604800]),
+				'unique'  => new Assert\Choice(
+					[
+						'choices' => ['name', 'tags', 'timeout', 'grace'],
+						'multiple' => true
+					]),
+				'tags'    => new Assert\Type('array'),
+				'schedule'=> new Assert\Type('string'),
+				'channels'=> new Assert\Type('string'),
+				'timezone'=> new Assert\Type('string')
+			]);
+
+		return $this->constraints;
+	}
+
+	private function getValidator()
+	{
+		$this->validator = $this->validator ?? Validation::createValidator();
+
+		return $this->validator;
 	}
 }
