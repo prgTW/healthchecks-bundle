@@ -298,10 +298,7 @@ class Healthchecks
 
 	private function getChecks(): array
 	{
-		if(null === $this->checks)
-		{
-			$this->checks = $this->resolver->resolve();
-		}
+		$this->checks = $this->resolver->resolve();
 
 		return $this->checks;
 	}
