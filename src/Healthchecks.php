@@ -92,7 +92,7 @@ class Healthchecks
 
 		$request = $this->messageFactory->createRequest(
 			'get',
-			sprintf('%s/api/v1/checks', $this->baseUri),
+			sprintf('%s/api/v1/checks/', $this->baseUri),
 			[
 				self::AUTH_HEADER => $this->apiKeys[$clientName],
 			]
