@@ -72,3 +72,61 @@ $api->pingMany(['simple', 'cron']);
 $api->pause('simple');
 $api->pauseMany(['simple', 'cron']);
 ```
+
+## Providing checks data at runtime
+
+To provide checks data at runtime you have to create your own resolver, and you have to configure bundle to use this resolver instead of default one
+
+For example:
+
+```php
+namespace App\Healthchecks\Resolver;
+
+use prgTW\HealthchecksBundle\Resolver\ResolverInterface;
+
+class CustomResolver implements ResolverInterface
+{
+	public function resolve()
+	{
+		// Get the data from your source and map your array in such format: 
+		return [
+			'backup_task'  => [
+				'name'     => 'Backup task',
+				'schedule' => '15 2 * * *',
+				'client'   => 'dev',
+				'tags'     => ['backup', 'devops'],
+				'unique'   => ['name', 'tags'],
+			],
+			'cleanup_task' => [
+				'name'     => 'Cleanup task',
+				'schedule' => '0 3 * * *',
+				'client'   => 'dev',
+				'tags'     => ['backup', 'devops'],
+				'unique'   => ['name', 'tags'],
+			],
+		];
+	}
+
+	public function resolveNames(): array
+	{
+		return ['backup_task', 'cleanup_task'];
+	}
+}
+```
+
+```yaml
+services:
+    healthchecks.resolver.custom:
+        class: "App\\Healthchecks\\Resolver\\CustomResolver"
+```
+
+
+```yaml
+healthchecks:
+    api:
+        clients:
+            example: "api-key-here"
+    timezone: "Europe/Warsaw" # default timezone to use for checks
+    resolver: "healthchecks.resolver.custom" #Service ID of your custom resolver 
+```
+
