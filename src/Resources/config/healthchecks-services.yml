@@ -4,14 +4,21 @@ parameters:
     healthchecks.command.pause.class: "prgTW\\HealthchecksBundle\\Command\\PauseCommand"
     healthchecks.command.setup.class: "prgTW\\HealthchecksBundle\\Command\\SetupCommand"
     healthchecks.command.wrap.class: "prgTW\\HealthchecksBundle\\Command\\WrapCommand"
+    healthchecks.resolver.default.class: "prgTW\\HealthchecksBundle\\Resolver\\DefaultResolver"
 
 services:
+    healthchecks.resolver.default:
+        class: "%healthchecks.resolver.default.class%"
+        arguments:
+            - "%healthchecks.checks%"
+
     healthchecks.api:
         class: "%healthchecks.class%"
         arguments:
             - # API keys
             - # API base_uri
-            - # checks
+            - # Default timezone
+            - "@healthchecks.resolver"
             - "@jms_serializer"
 
     healthchecks.command.ping:
@@ -32,7 +39,7 @@ services:
         class: "%healthchecks.command.setup.class%"
         arguments:
             - "@healthchecks.api"
-            - "%healthchecks.check_names%"
+            - "@healthchecks.resolver"
         tags:
             - { name: "console.command" }
 

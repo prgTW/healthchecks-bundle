@@ -11,8 +11,10 @@ use Http\Message\MessageFactory;
 use prgTW\HealthchecksBundle\IO\Check;
 use prgTW\HealthchecksBundle\IO\Checks;
 use JMS\Serializer\SerializerInterface;
+use prgTW\HealthchecksBundle\Resolver\ResolverInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class Healthchecks
 {
@@ -30,21 +32,71 @@ class Healthchecks
 	/** @var int */
 	private $baseUri;
 
+	/** @var ResolverInterface */
+	private $resolver;
+
+	/** @var OptionsResolver */
+	private $optionsResolver;
+
 	/** @var array */
-	protected $checks;
+	protected $checks = [];
 
 	/** @var SerializerInterface */
 	protected $serializer;
 
-	public function __construct(array $apiKeys, string $baseUri, array $checks, SerializerInterface $serializer)
+	const DEFAULT_CHECK_VALUES = [
+		'timeout'  => null,
+		'grace'    => 3600,
+		'schedule' => '* * * * *',
+		'tags'     => [],
+		'channels' => null,
+		'unique'   => ['name'],
+	];
+
+	const ALLOWED_UNIQUE_VALUES = ['name', 'tags', 'timeout', 'grace'];
+
+	protected $defaultTimezone = null;
+
+
+	public function __construct(array $apiKeys, string $baseUri, string $defaultTimezone, ResolverInterface $resolver, SerializerInterface $serializer)
 	{
-		$this->client         = HttpClientDiscovery::find();
-		$this->messageFactory = MessageFactoryDiscovery::find();
-		$this->apiKeys        = $apiKeys;
-		$this->baseUri        = $baseUri;
-		$this->checks         = $checks;
-		$this->serializer     = $serializer;
+		$this->client          = HttpClientDiscovery::find();
+		$this->messageFactory  = MessageFactoryDiscovery::find();
+		$this->apiKeys         = $apiKeys;
+		$this->baseUri         = $baseUri;
+		$this->serializer      = $serializer;
+		$this->resolver        = $resolver;
+		$this->defaultTimezone = $defaultTimezone;
+
+		$this->configureChecksOptions();
 	}
+
+	public function configureChecksOptions()
+	{
+		$this->optionsResolver = new OptionsResolver();
+		$this->optionsResolver->setDefaults(self::DEFAULT_CHECK_VALUES)
+			->setDefault('timezone', $this->defaultTimezone)
+			->setRequired(['client', 'name'])
+			->setAllowedTypes('client', 'string')
+			->setAllowedTypes('name', 'string')
+			->setAllowedTypes('timeout', ['null', 'int'])
+			->setAllowedTypes('grace', ['null', 'int'])
+			->setAllowedTypes('unique', ['null', 'array'])
+			->setAllowedTypes('tags', ['null', 'array'])
+			->setAllowedTypes('schedule', ['null', 'string'])
+			->setAllowedTypes('channels', ['null', 'string'])
+			->setAllowedTypes('timezone', ['null', 'string'])
+			->setAllowedValues('timeout', function ($value) {
+				return null === $value || $value > 59 && $value < 604800;
+			})
+			->setAllowedValues('grace', function ($value) {
+				return $value > 59 && $value < 604800;
+			})
+			->setAllowedValues('unique', function ($value) {
+				return 0 === count(array_diff($value, self::ALLOWED_UNIQUE_VALUES));
+			});
+	}
+
 
 	/**
 	 * @return Checks[]
@@ -67,7 +119,7 @@ class Healthchecks
 
 		$request = $this->messageFactory->createRequest(
 			'get',
-			sprintf('%s/api/v1/checks', $this->baseUri),
+			sprintf('%s/api/v1/checks/', $this->baseUri),
 			[
 				self::AUTH_HEADER => $this->apiKeys[$clientName],
 			]
@@ -94,7 +146,9 @@ class Healthchecks
 		$requests = [];
 		foreach ($checkNames as $checkName)
 		{
-			$check = $this->checks[$checkName];
+			$check = $this->getCheck($checkName);
+			$check = $this->optionsResolver->resolve($check);
+
 			$json  = [
 				'name'   => $check['name'],
 				'tags'   => implode(' ', $check['tags']),
@@ -152,7 +206,7 @@ class Healthchecks
 		{
 			$pingUrl = $check->getPingUrl();
 			$request = $this->messageFactory->createRequest('post', $pingUrl, [
-				self::AUTH_HEADER => $this->apiKeys[$this->checks[$checkName]['client']],
+				self::AUTH_HEADER => $this->apiKeys[$this->getCheck($checkName)['client']],
 			]);
 
 			$requests[$checkName] = $request;
@@ -173,7 +227,7 @@ class Healthchecks
 		{
 			$pauseUrl = $check->getPauseUrl();
 			$request  = $this->messageFactory->createRequest('post', $pauseUrl, [
-				self::AUTH_HEADER => $this->apiKeys[$this->checks[$checkName]['client']],
+				self::AUTH_HEADER => $this->apiKeys[$this->getCheck($checkName)['client']],
 			]);
 
 			$requests[$checkName] = $request;
@@ -207,7 +261,7 @@ class Healthchecks
 	 */
 	protected function getChecksByClients(array $checkNames): array
 	{
-		$checks          = array_intersect_key($this->checks, array_flip($checkNames));
+		$checks          = array_intersect_key($this->getChecks(), array_flip($checkNames));
 		$checksByClients = $this->groupChecksByClient($checks);
 
 		return $checksByClients;
@@ -261,9 +315,26 @@ class Healthchecks
 
 	protected function validateCheckName(string $checkName)
 	{
-		if (false === isset($this->checks[$checkName]))
+		if (null === $this->getCheck($checkName))
 		{
 			throw new \InvalidArgumentException(sprintf('Unknown check: %s', $checkName));
 		}
+	}
+
+	private function getChecks(): array
+	{
+		$this->checks = $this->resolver->resolve();
+
+		return $this->checks;
+	}
+
+	/**
+	 * @param string $key
+	 *
+	 * @return array|null
+	 */
+	private function getCheck(string $key)
+	{
+		return $this->getChecks()[$key] ?? null;
 	}
 }
