@@ -32,6 +32,7 @@
         "symfony/http-kernel": "^2.8 || ^3.0",
         "symfony/dependency-injection": "^2.8 || ^3.0",
         "symfony/process": "^2.8 || ^3.0",
+        "symfony/options-resolver": "^2.8 || ^3.0",
         "jms/serializer": "^1.6",
         "php-http/httplug": "^1.1",
         "php-http/message-factory": "^1.0",
