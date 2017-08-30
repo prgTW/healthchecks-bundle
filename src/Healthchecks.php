@@ -14,9 +14,7 @@ use JMS\Serializer\SerializerInterface;
 use prgTW\HealthchecksBundle\Resolver\ResolverInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Component\Validator\Validation;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class Healthchecks
 {
@@ -37,14 +35,11 @@ class Healthchecks
 	/** @var ResolverInterface */
 	private $resolver;
 
-	/** @var ValidatorInterface */
-	private $validator;
-
-	/** @var Assert\Collection */
-	private $constraints;
+	/** @var OptionsResolver */
+	private $optionsResolver;
 
 	/** @var array */
-	protected $checks = null;
+	protected $checks = [];
 
 	/** @var SerializerInterface */
 	protected $serializer;
@@ -58,7 +53,10 @@ class Healthchecks
 		'unique'   => ['name'],
 	];
 
+	const ALLOWED_UNIQUE_VALUES = ['name', 'tags', 'timeout', 'grace'];
+
 	protected $defaultTimezone = null;
+
 
 	public function __construct(array $apiKeys, string $baseUri, string $defaultTimezone, ResolverInterface $resolver, SerializerInterface $serializer)
 	{
@@ -69,7 +67,36 @@ class Healthchecks
 		$this->serializer      = $serializer;
 		$this->resolver        = $resolver;
 		$this->defaultTimezone = $defaultTimezone;
+
+		$this->configureChecksOptions();
 	}
+
+	public function configureChecksOptions()
+	{
+		$this->optionsResolver = new OptionsResolver();
+		$this->optionsResolver->setDefaults(self::DEFAULT_CHECK_VALUES)
+			->setDefault('timezone', $this->defaultTimezone)
+			->setRequired(['client', 'name'])
+			->setAllowedTypes('client', 'string')
+			->setAllowedTypes('name', 'string')
+			->setAllowedTypes('timeout', ['null', 'int'])
+			->setAllowedTypes('grace', ['null', 'int'])
+			->setAllowedTypes('unique', ['null', 'array'])
+			->setAllowedTypes('tags', ['null', 'array'])
+			->setAllowedTypes('schedule', ['null', 'string'])
+			->setAllowedTypes('channels', ['null', 'string'])
+			->setAllowedTypes('timezone', ['null', 'string'])
+			->setAllowedValues('timeout', function ($value) {
+				return null === $value || $value > 59 && $value < 604800;
+			})
+			->setAllowedValues('grace', function ($value) {
+				return $value > 59 && $value < 604800;
+			})
+			->setAllowedValues('unique', function ($value) {
+				return 0 === count(array_diff($value, self::ALLOWED_UNIQUE_VALUES));
+			});
+	}
+
 
 	/**
 	 * @return Checks[]
@@ -120,9 +147,7 @@ class Healthchecks
 		foreach ($checkNames as $checkName)
 		{
 			$check = $this->getCheck($checkName);
-			$check = $this->applyDefaults($check);
-
-			$this->validateCheck($check);
+			$check = $this->optionsResolver->resolve($check);
 
 			$json  = [
 				'name'   => $check['name'],
@@ -311,55 +336,5 @@ class Healthchecks
 	private function getCheck(string $key)
 	{
 		return $this->getChecks()[$key] ?? null;
-	}
-
-	private function validateCheck(array $check)
-	{
-		$constraints = $this->getConstraints();
-		$validator   = $this->getValidator();
-		$violations  = $validator->validate($check, $constraints);
-
-		if($violations->count() > 0)
-		{
-			throw new \InvalidArgumentException((string)$violations);
-		}
-	}
-
-	private function applyDefaults(array $check)
-	{
-		return array_merge(
-			self::DEFAULT_CHECK_VALUES,
-			['timezone' => $this->defaultTimezone],
-			$check
-		);
-	}
-
-	private function getConstraints()
-	{
-		$this->constraints = $this->constraints ?? new Assert\Collection(
-			[
-				'client'  => new Assert\NotBlank(),
-				'name'    => new Assert\NotBlank(),
-				'timeout' => new Assert\Range(['min' => 60, 'max' => 604800]),
-				'grace'   => new Assert\Range(['min' => 60, 'max' => 604800]),
-				'unique'  => new Assert\Choice(
-					[
-						'choices' => ['name', 'tags', 'timeout', 'grace'],
-						'multiple' => true
-					]),
-				'tags'    => new Assert\Type('array'),
-				'schedule'=> new Assert\Type('string'),
-				'channels'=> new Assert\Type('string'),
-				'timezone'=> new Assert\Type('string')
-			]);
-
-		return $this->constraints;
-	}
-
-	private function getValidator()
-	{
-		$this->validator = $this->validator ?? Validation::createValidator();
-
-		return $this->validator;
 	}
 }
