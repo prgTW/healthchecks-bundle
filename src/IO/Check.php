@@ -12,14 +12,14 @@ use JMS\Serializer\Annotation as Serializer;
 class Check
 {
 	/**
-	 * @var \DateTimeImmutable
+	 * @var \DateTimeImmutable|null
 	 *
 	 * @Serializer\Expose()
 	 * @Serializer\SerializedName("last_ping")
 	 * @Serializer\Type("DateTimeImmutable<'Y-m-d\TH:i:sO'>")
 	 * @Serializer\Accessor(getter="getLastPing")
 	 */
-	protected $lastPing;
+	protected $lastPing = null;
 
 	/**
 	 * @var string
@@ -32,14 +32,14 @@ class Check
 	protected $pingUrl;
 
 	/**
-	 * @var \DateTimeImmutable
+	 * @var \DateTimeImmutable|null
 	 *
 	 * @Serializer\Expose()
 	 * @Serializer\SerializedName("next_ping")
 	 * @Serializer\Type("DateTimeImmutable<'Y-m-d\TH:i:sO'>")
 	 * @Serializer\Accessor(getter="getNextPing")
 	 */
-	protected $nextPing;
+	protected $nextPing = null;
 
 	/**
 	 * @var int
@@ -142,9 +142,9 @@ class Check
 	protected $updateUrl;
 
 	/**
-	 * @return \DateTimeImmutable
+	 * @return \DateTimeImmutable|null
 	 */
-	public function getLastPing(): \DateTimeImmutable
+	public function getLastPing()
 	{
 		return $this->lastPing;
 	}
@@ -158,9 +158,9 @@ class Check
 	}
 
 	/**
-	 * @return \DateTimeImmutable
+	 * @return \DateTimeImmutable|null
 	 */
-	public function getNextPing(): \DateTimeImmutable
+	public function getNextPing()
 	{
 		return $this->nextPing;
 	}
