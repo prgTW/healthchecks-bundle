@@ -99,13 +99,15 @@ class Healthchecks
 
 
 	/**
-	 * @return Checks[]
+	 * @param array $tags To filter checks by their tags
+	 *
+	 * @return array
 	 */
-	public function listAllChecks(): array
+	public function listAllChecks(array $tags = []): array
 	{
 		$checksPerClient = array_map(
-			function (string $clientName) {
-				return $this->listChecks($clientName);
+			function (string $clientName) use ($tags) {
+				return $this->listChecks($clientName, $tags);
 			},
 			array_keys($this->apiKeys)
 		);
@@ -113,13 +115,15 @@ class Healthchecks
 		return $checksPerClient;
 	}
 
-	public function listChecks(string $clientName): Checks
+	public function listChecks(string $clientName, array $tags = []): Checks
 	{
+		$tagFilter = $this->buildTagFilter($tags);
+
 		$this->validateClientName($clientName);
 
 		$request = $this->messageFactory->createRequest(
 			'get',
-			sprintf('%s/api/v1/checks/', $this->baseUri),
+			sprintf('%s/api/v1/checks/%s', $this->baseUri, $tagFilter),
 			[
 				self::AUTH_HEADER => $this->apiKeys[$clientName],
 			]
@@ -319,6 +323,25 @@ class Healthchecks
 		{
 			throw new \InvalidArgumentException(sprintf('Unknown check: %s', $checkName));
 		}
+	}
+
+	private function buildTagFilter(array $tags): string
+	{
+		$queryString = '';
+
+		if (sizeof($tags) > 0)
+		{
+			$initial     = sprintf('?tag=%s', urlencode(array_shift($tags)));
+			$queryString = array_reduce(
+				$tags,
+				function ($query, $tag) {
+					return sprintf('%s&tag=%s', $query, urlencode($tag));
+				},
+				$initial
+			);
+		}
+
+		return $queryString;
 	}
 
 	private function getChecks(): array
