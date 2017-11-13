@@ -7,7 +7,9 @@ namespace prgTW\HealthchecksBundle;
 use Http\Client\HttpClient;
 use Http\Discovery\HttpClientDiscovery;
 use Http\Discovery\MessageFactoryDiscovery;
+use Http\Discovery\UriFactoryDiscovery;
 use Http\Message\MessageFactory;
+use Http\Message\UriFactory;
 use prgTW\HealthchecksBundle\IO\Check;
 use prgTW\HealthchecksBundle\IO\Checks;
 use JMS\Serializer\SerializerInterface;
@@ -25,6 +27,9 @@ class Healthchecks
 
 	/** @var MessageFactory */
 	private $messageFactory;
+
+	/** @var UriFactory */
+	private $uriFactory;
 
 	/** @var string[] */
 	protected $apiKeys;
@@ -99,9 +104,9 @@ class Healthchecks
 
 
 	/**
-	 * @param array $tags To filter checks by their tags
+	 * @param string[] $tags To filter checks by their tags
 	 *
-	 * @return array
+	 * @return Checks[]
 	 */
 	public function listAllChecks(array $tags = []): array
 	{
@@ -115,15 +120,27 @@ class Healthchecks
 		return $checksPerClient;
 	}
 
+	/**
+	 * @param string   $clientName
+	 * @param string[] $tags
+	 *
+	 * @return Checks
+	 */
 	public function listChecks(string $clientName, array $tags = []): Checks
 	{
-		$tagFilter = $this->buildTagFilter($tags);
+		$tags = array_map([$this, 'pairTagParam'], $tags);
+
+		$queryString = $this->buildQuery($tags);
+
+		$uri = $this->getUriFactory()
+			->createUri(sprintf('%s/api/v1/checks/', $this->baseUri))
+			->withQuery($queryString);
 
 		$this->validateClientName($clientName);
 
 		$request = $this->messageFactory->createRequest(
 			'get',
-			sprintf('%s/api/v1/checks/%s', $this->baseUri, $tagFilter),
+			$uri,
 			[
 				self::AUTH_HEADER => $this->apiKeys[$clientName],
 			]
@@ -325,25 +342,6 @@ class Healthchecks
 		}
 	}
 
-	private function buildTagFilter(array $tags): string
-	{
-		$queryString = '';
-
-		if (sizeof($tags) > 0)
-		{
-			$initial     = sprintf('?tag=%s', urlencode(array_shift($tags)));
-			$queryString = array_reduce(
-				$tags,
-				function ($query, $tag) {
-					return sprintf('%s&tag=%s', $query, urlencode($tag));
-				},
-				$initial
-			);
-		}
-
-		return $queryString;
-	}
-
 	private function getChecks(): array
 	{
 		$this->checks = $this->resolver->resolve();
@@ -359,5 +357,40 @@ class Healthchecks
 	private function getCheck(string $key)
 	{
 		return $this->getChecks()[$key] ?? null;
+	}
+
+	/**
+	 * @param array[][] $queryParams
+	 *
+	 * @return string
+	 */
+	private function buildQuery(array $queryParams = []): string
+	{
+		$queryParams = array_map(
+			function (array $keyValue)
+			{
+				list($key, $value) = $keyValue;
+
+				return sprintf('%s=%s', $key, urlencode($value));
+			},
+			$queryParams
+		);
+
+		return implode('&', $queryParams);
+	}
+
+	private function pairTagParam(string $tag)
+	{
+		return ['tag', $tag];
+	}
+
+	private function getUriFactory(): UriFactory
+	{
+		if(null === $this->uriFactory)
+		{
+			$this->uriFactory = UriFactoryDiscovery::find();
+		}
+
+		return $this->uriFactory;
 	}
 }
