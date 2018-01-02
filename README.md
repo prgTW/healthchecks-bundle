@@ -1,5 +1,6 @@
 # HealthchecksBundle
 
+[![Dependency Status](https://beta.gemnasium.com/badges/github.com/prgTW/healthchecks-bundle.svg)](https://beta.gemnasium.com/projects/github.com/prgTW/healthchecks-bundle)
 [![Packagist](https://img.shields.io/packagist/l/prgtw/healthchecks-bundle.svg)](https://github.com/prgTW/healthchecks-bundle)
 [![Packagist](https://img.shields.io/packagist/v/prgtw/healthchecks-bundle.svg)](https://packagist.org/packages/prgtw/healthchecks-bundle)
 
