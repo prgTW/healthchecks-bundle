@@ -217,8 +217,9 @@ class Healthchecks
 
 	/**
 	 * @param string[] $checkNames
+	 * @param bool     $success
 	 */
-	public function pingMany(array $checkNames)
+	public function pingMany(array $checkNames, bool $success = true)
 	{
 		$checks = $this->setupMany($checkNames);
 
@@ -226,6 +227,10 @@ class Healthchecks
 		foreach ($checks as $checkName => $check)
 		{
 			$pingUrl = $check->getPingUrl();
+			if (false === $success)
+			{
+				$pingUrl .= '/fail';
+			}
 			$request = $this->messageFactory->createRequest('post', $pingUrl, [
 				self::AUTH_HEADER => $this->apiKeys[$this->getCheck($checkName)['client']],
 			]);
@@ -265,9 +270,9 @@ class Healthchecks
 		return $check;
 	}
 
-	public function ping(string $checkName)
+	public function ping(string $checkName, bool $success = true)
 	{
-		$this->pingMany([$checkName]);
+		$this->pingMany([$checkName], $success);
 	}
 
 	public function pause(string $checkName)
