@@ -40,10 +40,10 @@ class Configuration implements ConfigurationInterface
 					->info('Default timezone to use for checks')
 					->defaultValue('Europe/Warsaw')
 					->validate()
-					->ifTrue(function(string $timezone) {
-						return false === in_array($timezone, \DateTimeZone::listIdentifiers(), true);
-					})
-					->thenInvalid('Invalid timezone supplied')
+						->ifTrue(function(string $timezone) {
+							return false === in_array($timezone, \DateTimeZone::listIdentifiers(\DateTimeZone::ALL_WITH_BC), true);
+						})
+						->thenInvalid('Invalid timezone supplied')
 					->end()
 				->end()
 			->end()
@@ -123,6 +123,12 @@ class Configuration implements ConfigurationInterface
 								->info('Server\'s timezone. This setting only has effect in combination with the "schedule" parameter')
 								->example('Europe/Warsaw')
 								->defaultNull()
+								->validate()
+									->ifTrue(function(string $timezone) {
+										return false === in_array($timezone, \DateTimeZone::listIdentifiers(\DateTimeZone::ALL_WITH_BC), true);
+									})
+									->thenInvalid('Invalid timezone supplied')
+								->end()
 							->end()
 							->arrayNode('tags')
 								->defaultValue([])
