@@ -202,9 +202,7 @@ class Check
 	 */
 	public function getTagsAsArray(): array
 	{
-		$tags = array_map('trim', explode(' ', $this->tags));
-
-		return $tags;
+		return array_map('trim', explode(' ', $this->tags));
 	}
 
 	/**

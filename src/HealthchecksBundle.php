@@ -9,17 +9,17 @@ use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 class HealthchecksBundle extends Bundle
 {
-    /** @var string */
-    protected $alias;
+	/** @var string */
+	protected $alias;
 
-    public function __construct(string $alias = 'healthchecks')
-    {
-        $this->alias = $alias;
-    }
+	public function __construct(string $alias = 'healthchecks')
+	{
+		$this->alias = $alias;
+	}
 
-    /** {@inheritdoc} */
-    public function getContainerExtension()
-    {
-        return new HealthchecksExtension($this->alias);
-    }
+	/** {@inheritdoc} */
+	public function getContainerExtension()
+	{
+		return new HealthchecksExtension($this->alias);
+	}
 }

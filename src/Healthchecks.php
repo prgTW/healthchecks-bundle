@@ -10,9 +10,9 @@ use Http\Discovery\MessageFactoryDiscovery;
 use Http\Discovery\UriFactoryDiscovery;
 use Http\Message\MessageFactory;
 use Http\Message\UriFactory;
+use JMS\Serializer\SerializerInterface;
 use prgTW\HealthchecksBundle\IO\Check;
 use prgTW\HealthchecksBundle\IO\Checks;
-use JMS\Serializer\SerializerInterface;
 use prgTW\HealthchecksBundle\Resolver\ResolverInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -63,8 +63,13 @@ class Healthchecks
 	protected $defaultTimezone = null;
 
 
-	public function __construct(array $apiKeys, string $baseUri, string $defaultTimezone, ResolverInterface $resolver, SerializerInterface $serializer)
-	{
+	public function __construct(
+		array $apiKeys,
+		string $baseUri,
+		string $defaultTimezone,
+		ResolverInterface $resolver,
+		SerializerInterface $serializer
+	) {
 		$this->client          = HttpClientDiscovery::find();
 		$this->messageFactory  = MessageFactoryDiscovery::find();
 		$this->apiKeys         = $apiKeys;
@@ -92,7 +97,7 @@ class Healthchecks
 			->setAllowedTypes('channels', ['null', 'string'])
 			->setAllowedTypes('timezone', ['null', 'string'])
 			->setAllowedValues('timeout', function ($value) {
-				return null === $value || $value > 59 && $value < 604800;
+				return null === $value || ($value > 59 && $value < 604800);
 			})
 			->setAllowedValues('grace', function ($value) {
 				return $value > 59 && $value < 604800;
@@ -170,7 +175,7 @@ class Healthchecks
 			$check = $this->getCheck($checkName);
 			$check = $this->optionsResolver->resolve($check);
 
-			$json  = [
+			$json = [
 				'name'   => $check['name'],
 				'tags'   => implode(' ', $check['tags']),
 				'grace'  => $check['grace'],
@@ -372,8 +377,7 @@ class Healthchecks
 	private function buildQuery(array $queryParams = []): string
 	{
 		$queryParams = array_map(
-			function (array $keyValue)
-			{
+			function (array $keyValue) {
 				list($key, $value) = $keyValue;
 
 				return sprintf('%s=%s', $key, urlencode($value));
@@ -391,7 +395,7 @@ class Healthchecks
 
 	private function getUriFactory(): UriFactory
 	{
-		if(null === $this->uriFactory)
+		if (null === $this->uriFactory)
 		{
 			$this->uriFactory = UriFactoryDiscovery::find();
 		}
