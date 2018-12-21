@@ -107,7 +107,6 @@ class Healthchecks
 			});
 	}
 
-
 	/**
 	 * @param string[] $tags To filter checks by their tags
 	 *
@@ -275,6 +274,27 @@ class Healthchecks
 		$this->processRequests($requests);
 	}
 
+	/**
+	 * @param string[] $checkNames
+	 */
+	public function startMany(array $checkNames)
+	{
+		$checks = $this->setupMany($checkNames);
+
+		$requests = [];
+		foreach ($checks as $checkName => $check)
+		{
+			$pingUrl = $check->getPingUrl() . '/start';
+			$request = $this->messageFactory->createRequest('post', $pingUrl, [
+				self::AUTH_HEADER => $this->apiKeys[$this->getCheck($checkName)['client']],
+			]);
+
+			$requests[$checkName] = $request;
+		}
+
+		$this->processRequests($requests);
+	}
+
 	public function setup(string $checkName): Check
 	{
 		$checks = $this->setupMany([$checkName]);
@@ -296,6 +316,11 @@ class Healthchecks
 	public function pause(string $checkName)
 	{
 		$this->pauseMany([$checkName]);
+	}
+
+	public function start(string $checkName)
+	{
+		$this->startMany([$checkName]);
 	}
 
 	/**
