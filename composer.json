@@ -39,7 +39,8 @@
         "php-http/discovery": "^1.2",
         "psr/http-message-implementation": "^1.0",
         "php-http/client-implementation": "^1.0",
-        "jms/serializer-bundle": "^1.5 || ^2.0"
+        "jms/serializer-bundle": "^1.5 || ^2.0",
+        "ext-json": "*"
     },
     "require-dev": {
         "roave/security-advisories": "dev-master",
