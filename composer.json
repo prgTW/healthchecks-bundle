@@ -42,6 +42,7 @@
         "jms/serializer-bundle": "^1.5 || ^2.0"
     },
     "require-dev": {
+        "roave/security-advisories": "dev-master",
         "guzzlehttp/psr7": "^1.4",
         "php-http/message": "^1.5",
         "php-http/mock-client": "^1.0"
