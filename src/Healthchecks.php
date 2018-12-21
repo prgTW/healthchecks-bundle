@@ -249,6 +249,14 @@ class Healthchecks
 	/**
 	 * @param string[] $checkNames
 	 */
+	public function failMany(array $checkNames)
+	{
+		$this->pingMany($checkNames, false);
+	}
+
+	/**
+	 * @param string[] $checkNames
+	 */
 	public function pauseMany(array $checkNames)
 	{
 		$checks = $this->setupMany($checkNames);
@@ -278,6 +286,11 @@ class Healthchecks
 	public function ping(string $checkName, bool $success = true)
 	{
 		$this->pingMany([$checkName], $success);
+	}
+
+	public function fail(string $checkName)
+	{
+		$this->pingMany([$checkName], false);
 	}
 
 	public function pause(string $checkName)
