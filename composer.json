@@ -30,7 +30,7 @@
         "symfony/config": "^2.8 || ^3.0 || ^4.0",
         "symfony/console": "^2.8 || ^3.0 || ^4.0",
         "symfony/http-kernel": "^2.8 || ^3.0 || ^4.0",
-        "symfony/dependency-injection": "^2.8 || ^3.0 || ^4.0,>=4.1.12",
+        "symfony/dependency-injection": "^2.8,>=2.8.51 || ^3.0,>=3.4.26 || ^4.1,>=4.1.12 || ^4.2,>=4.2.7",
         "symfony/process": "^2.8 || ^3.0 || ^4.0",
         "symfony/options-resolver": "^2.8 || ^3.0 || ^4.0",
         "jms/serializer": "^1.6",
