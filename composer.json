@@ -33,13 +33,13 @@
         "symfony/dependency-injection": "^2.8,>=2.8.51 || ^3.0,>=3.4.26 || ^4.1,>=4.1.12 || ^4.2,>=4.2.7",
         "symfony/process": "^2.8 || ^3.0 || ^4.0",
         "symfony/options-resolver": "^2.8 || ^3.0 || ^4.0",
-        "jms/serializer": "^1.6",
+        "jms/serializer": "^3.6",
         "php-http/httplug": "^1.1",
         "php-http/message-factory": "^1.0",
         "php-http/discovery": "^1.2",
         "psr/http-message-implementation": "^1.0",
         "php-http/client-implementation": "^1.0",
-        "jms/serializer-bundle": "^1.5 || ^2.0",
+        "jms/serializer-bundle": "^3.4",
         "ext-json": "*"
     },
     "require-dev": {
