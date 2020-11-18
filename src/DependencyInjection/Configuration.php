@@ -21,7 +21,7 @@ class Configuration implements ConfigurationInterface
 	/** {@inheritdoc} */
 	public function getConfigTreeBuilder()
 	{
-		$treeBuilder = new TreeBuilder();
+		$treeBuilder = new TreeBuilder($this->alias);
 
 		if (method_exists($treeBuilder, 'getRootNode'))
 		{
