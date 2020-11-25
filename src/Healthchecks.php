@@ -4,19 +4,21 @@ declare(strict_types=1);
 
 namespace prgTW\HealthchecksBundle;
 
+use GuzzleHttp\Psr7\Utils;
 use Http\Client\HttpClient;
 use Http\Discovery\HttpClientDiscovery;
-use Http\Discovery\MessageFactoryDiscovery;
-use Http\Discovery\UriFactoryDiscovery;
-use Http\Message\MessageFactory;
+use Http\Discovery\Psr17FactoryDiscovery;
 use Http\Message\UriFactory;
 use JMS\Serializer\SerializerInterface;
 use prgTW\HealthchecksBundle\IO\Check;
 use prgTW\HealthchecksBundle\IO\Checks;
 use prgTW\HealthchecksBundle\Resolver\ResolverInterface;
+use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\UriFactoryInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use function GuzzleHttp\Psr7\stream_for;
 
 class Healthchecks
 {
@@ -25,10 +27,10 @@ class Healthchecks
 	/** @var HttpClient */
 	protected $client;
 
-	/** @var MessageFactory */
-	private $messageFactory;
+	/** @var RequestFactoryInterface */
+	private $requestFactory;
 
-	/** @var UriFactory */
+	/** @var UriFactoryInterface */
 	private $uriFactory;
 
 	/** @var string[] */
@@ -71,7 +73,7 @@ class Healthchecks
 		SerializerInterface $serializer
 	) {
 		$this->client          = HttpClientDiscovery::find();
-		$this->messageFactory  = MessageFactoryDiscovery::find();
+		$this->requestFactory  = Psr17FactoryDiscovery::findRequestFactory();
 		$this->apiKeys         = $apiKeys;
 		$this->baseUri         = $baseUri;
 		$this->serializer      = $serializer;
@@ -142,13 +144,10 @@ class Healthchecks
 
 		$this->validateClientName($clientName);
 
-		$request = $this->messageFactory->createRequest(
-			'get',
-			$uri,
-			[
-				self::AUTH_HEADER => $this->apiKeys[$clientName],
-			]
-		);
+		$request = $this
+			->requestFactory
+			->createRequest('get', $uri)
+			->withHeader(self::AUTH_HEADER, $this->apiKeys[$clientName]);
 
 		$response = $this->client->sendRequest($request);
 		$body     = (string)$response->getBody();
@@ -194,14 +193,11 @@ class Healthchecks
 				$json['tz']       = $check['timezone'];
 			}
 
-			$requests[$checkName] = $this->messageFactory->createRequest(
-				'post',
-				sprintf('%s/api/v1/checks/', $this->baseUri),
-				[
-					self::AUTH_HEADER => $this->apiKeys[$check['client']],
-				],
-				json_encode($json, JSON_UNESCAPED_UNICODE)
-			);
+			$requests[$checkName] = $this
+				->requestFactory
+				->createRequest('post', sprintf('%s/api/v1/checks/', $this->baseUri))
+				->withHeader(self::AUTH_HEADER, $this->apiKeys[$check['client']])
+				->withBody(Utils::streamFor(json_encode($json, JSON_UNESCAPED_UNICODE)));
 		}
 
 		$checks    = [];
@@ -235,9 +231,10 @@ class Healthchecks
 			{
 				$pingUrl .= '/fail';
 			}
-			$request = $this->messageFactory->createRequest('post', $pingUrl, [
-				self::AUTH_HEADER => $this->apiKeys[$this->getCheck($checkName)['client']],
-			]);
+			$request = $this
+				->requestFactory
+				->createRequest('post', $pingUrl)
+				->withHeader(self::AUTH_HEADER, $this->apiKeys[$this->getCheck($checkName)['client']]);
 
 			$requests[$checkName] = $request;
 		}
@@ -264,9 +261,10 @@ class Healthchecks
 		foreach ($checks as $checkName => $check)
 		{
 			$pauseUrl = $check->getPauseUrl();
-			$request  = $this->messageFactory->createRequest('post', $pauseUrl, [
-				self::AUTH_HEADER => $this->apiKeys[$this->getCheck($checkName)['client']],
-			]);
+			$request  = $this
+				->requestFactory
+				->createRequest('post', $pauseUrl)
+				->withHeader(self::AUTH_HEADER, $this->apiKeys[$this->getCheck($checkName)['client']]);
 
 			$requests[$checkName] = $request;
 		}
@@ -285,9 +283,10 @@ class Healthchecks
 		foreach ($checks as $checkName => $check)
 		{
 			$pingUrl = $check->getPingUrl() . '/start';
-			$request = $this->messageFactory->createRequest('post', $pingUrl, [
-				self::AUTH_HEADER => $this->apiKeys[$this->getCheck($checkName)['client']],
-			]);
+			$request = $this
+				->requestFactory
+				->createRequest('post', $pingUrl)
+				->withHeader(self::AUTH_HEADER, $this->apiKeys[$this->getCheck($checkName)['client']]);
 
 			$requests[$checkName] = $request;
 		}
@@ -435,7 +434,7 @@ class Healthchecks
 	{
 		if (null === $this->uriFactory)
 		{
-			$this->uriFactory = UriFactoryDiscovery::find();
+			$this->uriFactory = Psr17FactoryDiscovery::findUriFactory();
 		}
 
 		return $this->uriFactory;
