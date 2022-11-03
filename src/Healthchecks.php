@@ -8,7 +8,6 @@ use GuzzleHttp\Psr7\Utils;
 use Http\Client\HttpClient;
 use Http\Discovery\HttpClientDiscovery;
 use Http\Discovery\Psr17FactoryDiscovery;
-use Http\Message\UriFactory;
 use JMS\Serializer\SerializerInterface;
 use prgTW\HealthchecksBundle\IO\Check;
 use prgTW\HealthchecksBundle\IO\Checks;
@@ -430,7 +429,7 @@ class Healthchecks
 		return ['tag', $tag];
 	}
 
-	private function getUriFactory(): UriFactory
+	private function getUriFactory(): UriFactoryInterface
 	{
 		if (null === $this->uriFactory)
 		{
