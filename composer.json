@@ -26,12 +26,13 @@
         }
     },
     "require": {
-        "php": "^7.0",
+        "php": "^7.0 || ~8.0.0",
         "symfony/config": "^2.8 || ^3.0 || ^4.0",
         "symfony/console": "^2.8 || ^3.0 || ^4.0",
+        "symfony/http-client": "^5.4",
         "symfony/http-kernel": "^2.8 || ^3.0 || ^4.0",
         "symfony/dependency-injection": "^2.8,>=2.8.51 || ^3.0,>=3.4.26 || ^4.1,>=4.1.12 || ^4.2,>=4.2.7",
-        "symfony/process": "^2.8 || ^3.0 || ^4.0",
+        "symfony/process": "^2.8 || ^3.0 || ^4.0 || ^5.4",
         "symfony/options-resolver": "^2.8 || ^3.0 || ^4.0",
         "jms/serializer": "^1.6 || ^2.0 || ^3.0",
         "php-http/httplug": "^1.0 || ^2.0",
@@ -40,12 +41,18 @@
         "psr/http-message-implementation": "^1.0",
         "php-http/client-implementation": "^1.0",
         "jms/serializer-bundle": "^1.5 || ^2.0 || ^3.0",
-        "ext-json": "*"
+        "ext-json": "*",
+        "http-interop/http-factory-guzzle": "^1.2"
     },
     "require-dev": {
         "roave/security-advisories": "dev-master",
         "guzzlehttp/psr7": "^1.4",
         "php-http/message": "^1.5",
         "php-http/mock-client": "^1.0"
+    },
+    "config": {
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
     }
 }
