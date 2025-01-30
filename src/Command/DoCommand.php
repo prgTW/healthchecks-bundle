@@ -70,5 +70,7 @@ class DoCommand extends Command
 				$this->api->failMany($checks);
 				break;
 		}
+
+		return 0;
 	}
 }
