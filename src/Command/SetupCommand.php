@@ -45,6 +45,6 @@ class SetupCommand extends Command
 		$checks = $input->getArgument('check') ?: $this->resolver->resolveNames();
 		$this->api->setupMany($checks);
 
-        return 0;
+		return 0;
 	}
 }

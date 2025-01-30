@@ -71,6 +71,6 @@ class DoCommand extends Command
 				break;
 		}
 
-        return 0;
+		return 0;
 	}
 }

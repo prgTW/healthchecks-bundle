@@ -36,6 +36,6 @@ class PingCommand extends Command
 		$checks = $input->getArgument('check');
 		$this->api->pingMany($checks);
 
-        return 0;
+		return 0;
 	}
 }

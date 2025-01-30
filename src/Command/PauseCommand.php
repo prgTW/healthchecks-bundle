@@ -36,6 +36,6 @@ class PauseCommand extends Command
 		$checks = $input->getArgument('check');
 		$this->api->pauseMany($checks);
 
-        return 0;
+		return 0;
 	}
 }
