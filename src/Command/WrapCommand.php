@@ -60,5 +60,7 @@ class WrapCommand extends Command
 		{
 			$this->api->ping($check);
 		}
+
+		return 0;
 	}
 }
