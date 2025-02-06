@@ -26,7 +26,7 @@
         }
     },
     "require": {
-        "php": "^7.0",
+        "php": "^7.0 || ~8.1",
         "symfony/config": "^2.8 || ^3.0 || ^4.0 || ^5.0",
         "symfony/console": "^2.8 || ^3.0 || ^4.0 || ^5.0",
         "symfony/http-kernel": "^2.8 || ^3.0 || ^4.0 || ^5.0",
@@ -47,5 +47,10 @@
         "guzzlehttp/psr7": "^1.4",
         "php-http/message": "^1.5",
         "php-http/mock-client": "^1.0"
+    },
+    "config": {
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
     }
 }
