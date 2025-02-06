@@ -40,8 +40,7 @@
         "psr/http-message-implementation": "^1.0",
         "php-http/client-implementation": "^1.0",
         "jms/serializer-bundle": "^1.5 || ^2.0 || ^3.0",
-        "ext-json": "*",
-        "http-interop/http-factory-guzzle": "^1.2"
+        "ext-json": "*"
     },
     "require-dev": {
         "roave/security-advisories": "dev-master",
