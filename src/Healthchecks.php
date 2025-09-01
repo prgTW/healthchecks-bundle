@@ -12,18 +12,18 @@ use JMS\Serializer\SerializerInterface;
 use prgTW\HealthchecksBundle\IO\Check;
 use prgTW\HealthchecksBundle\IO\Checks;
 use prgTW\HealthchecksBundle\Resolver\ResolverInterface;
+use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UriFactoryInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use function GuzzleHttp\Psr7\stream_for;
 
 class Healthchecks
 {
 	const AUTH_HEADER = 'X-Api-Key';
 
-	/** @var HttpClient */
+	/** @var ClientInterface */
 	protected $client;
 
 	/** @var RequestFactoryInterface */
@@ -80,6 +80,16 @@ class Healthchecks
 		$this->defaultTimezone = $defaultTimezone;
 
 		$this->configureChecksOptions();
+	}
+
+	public function setClient(ClientInterface $client)
+	{
+		$this->client = $client;
+	}
+
+	public function setRequestFactory(RequestFactoryInterface $requestFactory)
+	{
+		$this->requestFactory = $requestFactory;
 	}
 
 	public function configureChecksOptions()
