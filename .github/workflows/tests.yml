@@ -37,10 +37,10 @@ jobs:
           'symfony/http-kernel:${{ matrix.symfony }}' \
           'symfony/options-resolver:${{ matrix.symfony }}' \
           'symfony/process:${{ matrix.symfony }}' \
+          'symfony/yaml:${{ matrix.symfony }}' \
           --no-update
         composer require --dev \
           'symfony/framework-bundle:${{ matrix.symfony }}' \
-          'symfony/yaml:${{ matrix.symfony }}' \
           --no-update
         # jms/serializer < 3.14 has a class named ReadOnly, which does not parse on PHP 8.1+
         if [ '${{ matrix.deps }}' = 'lowest' ]; then composer require 'jms/serializer:^3.14' --no-update; fi
