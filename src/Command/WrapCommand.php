@@ -39,7 +39,7 @@ class WrapCommand extends Command
 		$check   = $input->getArgument('check');
 		$command = $input->getArgument('cmd');
 
-		$process  = new Process($command);
+		$process  = Process::fromShellCommandline($command);
 		$exitCode = $process->run(function ($type, $buffer) use ($output) {
 			if (Process::ERR === $type)
 			{
