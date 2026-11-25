@@ -44,6 +44,9 @@
         "jms/serializer-bundle": "^1.5 || ^2.0 || ^3.0 || ^4.0 || ^5.0",
         "ext-json": "*"
     },
+    "conflict": {
+        "jms/serializer": ">=3.11 <3.14"
+    },
     "require-dev": {
         "roave/security-advisories": "dev-master",
         "phpunit/phpunit": "^9.6",
