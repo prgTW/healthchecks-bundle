@@ -39,7 +39,8 @@ class WrapCommand extends Command
 		$check   = $input->getArgument('check');
 		$command = $input->getArgument('cmd');
 
-		$process  = new Process($command);
+		// Symfony 5 only accepts an array in the constructor; fromShellCommandline() exists since 4.2
+		$process  = method_exists(Process::class, 'fromShellCommandline') ? Process::fromShellCommandline($command) : new Process($command);
 		$exitCode = $process->run(function ($type, $buffer) use ($output) {
 			if (Process::ERR === $type)
 			{
