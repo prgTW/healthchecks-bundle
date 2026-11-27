@@ -70,8 +70,7 @@ class WrapCommand extends Command
 
 	protected function createProcess(string $command): Process
 	{
-		// Symfony 5 only accepts an array in the constructor; fromShellCommandline() exists since 4.2
-		$process = method_exists(Process::class, 'fromShellCommandline') ? Process::fromShellCommandline($command) : new Process($command);
+		$process = Process::fromShellCommandline($command);
 		// How long the wrapped command may run is up to that command, not to this wrapper
 		$process->setTimeout(null);
 

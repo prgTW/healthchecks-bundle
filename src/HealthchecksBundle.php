@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace prgTW\HealthchecksBundle;
 
 use prgTW\HealthchecksBundle\DependencyInjection\HealthchecksExtension;
+use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 class HealthchecksBundle extends Bundle
@@ -18,7 +19,7 @@ class HealthchecksBundle extends Bundle
 	}
 
 	/** {@inheritdoc} */
-	public function getContainerExtension()
+	public function getContainerExtension(): ?ExtensionInterface
 	{
 		return new HealthchecksExtension($this->alias);
 	}
