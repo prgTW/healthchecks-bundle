@@ -30,7 +30,7 @@ class WrapCommand extends Command
 		$this->setName('healthchecks:wrap');
 		$this->addArgument('check', InputArgument::REQUIRED, 'Check name');
 		$this->addArgument('cmd', InputArgument::REQUIRED, 'Command to run');
-		$this->setDescription('Pings given check(s) upon successful execution of a given command');
+		$this->setDescription('Runs a given command and pings given check(s) on success or sends a fail ping on failure');
 	}
 
 	/** {@inheritdoc} */
@@ -39,8 +39,7 @@ class WrapCommand extends Command
 		$check   = $input->getArgument('check');
 		$command = $input->getArgument('cmd');
 
-		// Symfony 5 only accepts an array in the constructor; fromShellCommandline() exists since 4.2
-		$process  = method_exists(Process::class, 'fromShellCommandline') ? Process::fromShellCommandline($command) : new Process($command);
+		$process  = $this->createProcess($command);
 		$exitCode = $process->run(function ($type, $buffer) use ($output) {
 			if (Process::ERR === $type)
 			{
@@ -61,7 +60,21 @@ class WrapCommand extends Command
 		{
 			$this->api->ping($check);
 		}
+		else
+		{
+			$this->api->fail($check);
+		}
 
-		return 0;
+		return $exitCode;
+	}
+
+	protected function createProcess(string $command): Process
+	{
+		// Symfony 5 only accepts an array in the constructor; fromShellCommandline() exists since 4.2
+		$process = method_exists(Process::class, 'fromShellCommandline') ? Process::fromShellCommandline($command) : new Process($command);
+		// How long the wrapped command may run is up to that command, not to this wrapper
+		$process->setTimeout(null);
+
+		return $process;
 	}
 }
