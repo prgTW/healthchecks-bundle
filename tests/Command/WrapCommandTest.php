@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 use prgTW\HealthchecksBundle\Command\WrapCommand;
 use prgTW\HealthchecksBundle\Healthchecks;
 use Symfony\Component\Console\Tester\CommandTester;
+use Symfony\Component\Process\Process;
 
 class WrapCommandTest extends TestCase
 {
@@ -30,5 +31,45 @@ class WrapCommandTest extends TestCase
 
 		$tester = new CommandTester(new WrapCommand($api));
 		$tester->execute(['check' => 'simple', 'cmd' => 'exit 3']);
+	}
+
+	public function testReturnsExitCodeOfWrappedCommand(): void
+	{
+		$api = $this->createMock(Healthchecks::class);
+
+		$tester   = new CommandTester(new WrapCommand($api));
+		$exitCode = $tester->execute(['check' => 'simple', 'cmd' => 'exit 3']);
+
+		self::assertSame(3, $exitCode);
+	}
+
+	public function testSendsFailPingWhenWrappedCommandFails(): void
+	{
+		$api = $this->createMock(Healthchecks::class);
+		$api->expects(self::once())->method('fail')->with('simple');
+
+		$tester = new CommandTester(new WrapCommand($api));
+		$tester->execute(['check' => 'simple', 'cmd' => 'exit 3']);
+	}
+
+	public function testWrappedCommandHasNoTimeout(): void
+	{
+		$command = new class($this->createMock(Healthchecks::class)) extends WrapCommand {
+			public function exposedCreateProcess(string $command): Process
+			{
+				return $this->createProcess($command);
+			}
+		};
+
+		self::assertNull($command->exposedCreateProcess('true')->getTimeout());
+	}
+
+	public function testDoesNotSendFailPingWhenWrappedCommandSucceeds(): void
+	{
+		$api = $this->createMock(Healthchecks::class);
+		$api->expects(self::never())->method('fail');
+
+		$tester = new CommandTester(new WrapCommand($api));
+		$tester->execute(['check' => 'simple', 'cmd' => 'true']);
 	}
 }
