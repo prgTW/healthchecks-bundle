@@ -39,8 +39,7 @@ class WrapCommand extends Command
 		$check   = $input->getArgument('check');
 		$command = $input->getArgument('cmd');
 
-		// Symfony 5 only accepts an array in the constructor; fromShellCommandline() exists since 4.2
-		$process  = method_exists(Process::class, 'fromShellCommandline') ? Process::fromShellCommandline($command) : new Process($command);
+		$process  = $this->createProcess($command);
 		$exitCode = $process->run(function ($type, $buffer) use ($output) {
 			if (Process::ERR === $type)
 			{
@@ -67,5 +66,15 @@ class WrapCommand extends Command
 		}
 
 		return $exitCode;
+	}
+
+	protected function createProcess(string $command): Process
+	{
+		// Symfony 5 only accepts an array in the constructor; fromShellCommandline() exists since 4.2
+		$process = method_exists(Process::class, 'fromShellCommandline') ? Process::fromShellCommandline($command) : new Process($command);
+		// How long the wrapped command may run is up to that command, not to this wrapper
+		$process->setTimeout(null);
+
+		return $process;
 	}
 }
